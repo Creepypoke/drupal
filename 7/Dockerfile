@@ -37,11 +37,17 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 
-# Install drush 7.0
+# Install Composer for Drush
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN apt-get -y install git
+
+# Install Drush 7.0
 RUN composer global require drush/drush:7.*
 RUN export PATH="$HOME/.composer/vendor/bin:$PATH"
 
+# Run apache2 service
+RUN systemctl enable apache2.service
+
+# Clean
 RUN apt-get -y remove git
 RUN apt-get -y autoremove
