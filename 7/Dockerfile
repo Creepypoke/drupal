@@ -4,10 +4,11 @@ FROM php:5.6-apache
 RUN a2enmod rewrite
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng12-dev libjpeg-dev libpq-dev \
+RUN apt-get update && apt-get install -y libpng12-dev libjpeg-dev libpq-dev zlib1g-dev \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
-	&& docker-php-ext-install gd mbstring pdo pdo_mysql pdo_pgsql
+	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr --with-zlib --with-libzip=/urs \
+	&& docker-php-ext-install gd mbstring pdo pdo_mysql pdo_pgsql zip
+
 
 WORKDIR /var/www/html
 
@@ -24,7 +25,7 @@ RUN curl -fSL "http://ftp.drupal.org/files/projects/drupal-${DRUPAL_VERSION}.tar
 
 RUN apt-get update && apt-get install -y openssh-server
 RUN mkdir /var/run/sshd
-RUN echo 'root:screencast' | chpasswd
+RUN echo 'root:123' | chpasswd
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 # SSH login fix. Otherwise user is kicked off after login
@@ -36,4 +37,11 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
 
+# Install drush 7.0
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN apt-get -y install git
+RUN composer global require drush/drush:7.*
+RUN export PATH="$HOME/.composer/vendor/bin:$PATH"
+
+RUN apt-get -y remove git
+RUN apt-get -y autoremove
