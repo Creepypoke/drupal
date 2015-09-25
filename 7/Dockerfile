@@ -46,7 +46,7 @@ RUN composer global require drush/drush:7.*
 RUN export PATH="$HOME/.composer/vendor/bin:$PATH"
 
 # Run apache2 service
-RUN systemctl enable apache2.service
+RUN /usr/sbin/apache2ctl -D FOREGROUND
 
 # Clean
 RUN apt-get -y remove git
